@@ -6,19 +6,17 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex; /* ใช้ Flexbox เพื่อจัดวาง aside, main, aside-right */
-    /* เปลี่ยนจาก display: flex; เดิมเพื่อให้มีพื้นที่ว่างด้านขวา */
     background-color: #2c3e50;
     color: #ecf0f1;
     margin: 0;
     padding: 20px;
     gap: 20px; /* เพิ่มช่องว่างระหว่างคอลัมน์ */
 }
-main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* Allow main to grow and take available space */
-    flex-grow: 1;
+main { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    flex-grow: 1; /* ให้ main ขยายเต็มพื้นที่ที่เหลือ */
 }
 #controls {
     background-color: #34495e;
@@ -108,7 +106,7 @@ input[type="file"] { display: none; }
     pointer-events: none;
 }
 #fog-container {
-    display: none;
+    display: none; /* **ตรงนี้สำคัญ:** ซ่อนหมอกไว้เมื่อโหลดหน้า */
     grid-template-columns: var(--grid-template-cols);
     grid-template-rows: var(--grid-template-rows);
     pointer-events: all; 
@@ -126,22 +124,43 @@ input[type="file"] { display: none; }
     opacity: 0;
     pointer-events: none; 
 }
-/* Re-style for the new dice panel position */
-#dice-log-right { /* เปลี่ยนจาก .dice-buttons ที่เคยอยู่ตรง controls */
+
+/* Re-style for the new dice panel position (now on the right) */
+#dice-log-right {
     background-color: #34495e;
     padding: 15px;
     border-radius: 8px;
-    width: 300px; /* ให้ขนาดเท่ากับ controls */
+    width: 200px; /* ให้ขนาดตามที่คุณต้องการ */
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     flex-shrink: 0;
     max-height: 95vh;
     overflow-y: auto;
 }
-#dice-log-right h3 { margin-top: 0; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; } /* Adjust margin-top */
+#dice-log-right h3 { margin-top: 0; border-bottom: 1px solid #7f8c8d; padding-bottom: 10px; }
 
-.dice-buttons { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
-.dice-buttons button { background-color: #e67e22; }
-.dice-buttons button:hover { background-color: #f39c12; }
+/* ทำให้แน่ใจว่า .dice-buttons ภายใน #dice-log-right มี grid layout ที่ถูกต้อง */
+#dice-log-right .dice-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr; /* 3 คอลัมน์ */
+    gap: 10px; /* ระยะห่างระหว่างปุ่ม */
+    margin-bottom: 15px; /* ระยะห่างจากส่วนต่อไป */
+}
+
+/* สไตล์สำหรับปุ่มทอยเต๋าแต่ละปุ่มในแผงด้านขวา */
+#dice-log-right .dice-buttons button {
+    padding: 8px; /* ลด padding เพื่อให้ปุ่มเล็กลง */
+    font-size: 0.9em; /* ลดขนาดตัวอักษร */
+    background-color: #e67e22;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+#dice-log-right .dice-buttons button:hover {
+    background-color: #f39c12;
+}
+
 .dice-result-area { text-align: center; margin: 10px 0; font-size: 1.2em; }
 #dice-result { font-size: 1.5em; font-weight: bold; color: #f1c40f; }
 #dice-log-container { margin-top: 10px; }
@@ -149,7 +168,7 @@ input[type="file"] { display: none; }
     background-color: rgba(0,0,0,0.2);
     border-radius: 4px;
     padding: 10px;
-    height: 300px; /* เพิ่มความสูงของ Log */
+    height: 450px; /* ปรับความสูงของ Log ตามที่คุณต้องการ */
     overflow-y: auto; 
     display: flex;
     flex-direction: column-reverse; 
@@ -157,21 +176,22 @@ input[type="file"] { display: none; }
 #dice-log div { margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #7f8c8d; }
 
 .external-dice-link {
-    display: block; /* ทำให้เป็นบล็อกเพื่อจัดสไตล์ได้ */
+    display: block;
     width: 100%;
     padding: 10px;
-    background-color: #3498db; /* สีเดียวกับปุ่ม Save */
+    background-color: #3498db;
     color: white;
     text-align: center;
     border-radius: 4px;
-    text-decoration: none; /* ไม่มีขีดเส้นใต้ */
+    text-decoration: none;
     font-weight: bold;
-    margin-top: 15px; /* เพิ่มระยะห่างจากด้านบน */
-    box-sizing: border-box; /* ให้ padding อยู่ข้างในความกว้าง 100% */
+    margin-top: 15px;
+    box-sizing: border-box;
 }
 .external-dice-link:hover {
-    background-color: #2980b9; /* สีเข้มขึ้นเมื่อ hover */
+    background-color: #2980b9;
 }
+
 
 .drawing-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
 .drawing-tools button.active { border: 2px solid #f1c40f; box-shadow: 0 0 5px #f1c40f; }

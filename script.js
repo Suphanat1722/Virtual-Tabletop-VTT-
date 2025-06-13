@@ -21,7 +21,7 @@ let currentTurnIndex = -1;
 let rightClickedToken = null;
 
 // =================================================================
-// SECTION: Combined DOMContentLoaded Listener (แก้ไขตรงนี้)
+// SECTION: Combined DOMContentLoaded Listener
 // =================================================================
 document.addEventListener('DOMContentLoaded', () => {
     ctx = drawCanvas.getContext('2d');
@@ -31,8 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addCanvasListeners();
     loadGame(); // โหลดเกมล่าสุดอัตโนมัติเมื่อเปิดหน้า
 
-    // === เพิ่มส่วนนี้สำหรับการฟังผลลูกเต๋าจาก Firestore ===
-    // ย้ายโค้ดนี้มาจาก DOMContentLoaded listener ที่ซ้ำกัน
+    // === ส่วนนี้สำหรับฟังผลลูกเต๋าจาก Firebase Firestore (นำกลับมา) ===
     if (window.db) { // ตรวจสอบว่า Firebase โหลดแล้ว
         const diceRollsCol = window.collection(window.db, 'diceRolls');
         const q = window.query(diceRollsCol, window.orderBy('timestamp', 'desc'), window.limit(15)); // ดึง 15 รายการล่าสุด
@@ -60,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.warn("Firebase Firestore not initialized. Dice rolls will not sync.");
     }
+    updateFogToggleButton(); 
     // === สิ้นสุดส่วนนี้ ===
 });
 
@@ -286,8 +286,6 @@ function processAndResizeImage(file, maxWidth, maxHeight, callback) {
 // SECTION: Sub-systems (Fog, Drawing, Tracker, Dice)
 // =================================================================
 
-// Removed the redundant DOMContentLoaded listener from here.
-
 function initializeCanvas() {
     const boardRect = board.getBoundingClientRect();
     drawCanvas.width = boardRect.width;
@@ -336,9 +334,19 @@ function revealFog(e) {
         targetElement.classList.add('is-revealed');
     }
 }
+function updateFogToggleButton() {
+    const toggleFogBtn = document.getElementById('toggle-fog-btn');
+    if (fogContainer.classList.contains('is-active')) {
+        toggleFogBtn.innerText = 'Toggle Fog of War (On)'; // หรือ 'Turn Off Fog'
+    } else {
+        toggleFogBtn.innerText = 'Toggle Fog of War (Off)'; // หรือ 'Turn On Fog'
+    }
+}
 
 function toggleFog() {
     fogContainer.classList.toggle('is-active');
+    // **เรียกอัปเดตสถานะปุ่มเมื่อมีการคลิก toggle**
+    updateFogToggleButton(); 
     if (fogContainer.classList.contains('is-active') && currentTool) {
         selectTool(currentTool); // Deactivate current tool if fog is turned on
     }
@@ -440,10 +448,10 @@ function redrawTurnList() {
 }
 
 function rollDice(sides) {
-    // ไม่มีแล้ว diceResultEl, diceLogEl เพราะจะดึงจาก Firestore โดยตรง
+    const diceResultEl = document.getElementById('dice-result');
+    const diceLogEl = document.getElementById('dice-log');
     const result = Math.floor(Math.random() * sides) + 1;
     
-    // === เพิ่มส่วนนี้เพื่อส่งข้อมูลไป Firestore ===
     if (window.db) {
         window.addDoc(window.collection(window.db, 'diceRolls'), {
             result: result,
@@ -458,10 +466,7 @@ function rollDice(sides) {
         });
     } else {
         console.warn("Firebase Firestore not initialized. Dice roll not sent from DM.");
-        // ถ้า Firebase ไม่มี ให้ย้อนกลับไปใช้ logic เดิม (ไม่แนะนำ)
-        // ถ้าคุณแน่ใจว่า Firebase จะต้องทำงาน ให้ลบโค้ดส่วนนี้ออกได้
-        const diceResultEl = document.getElementById('dice-result');
-        const diceLogEl = document.getElementById('dice-log');
+        // ถ้า Firebase ไม่มี ให้ย้อนกลับไปใช้ logic เดิม (ไม่แนะนำถ้าใช้ Firebase เป็นหลัก)
         diceResultEl.innerText = result;
         const logEntry = document.createElement('div');
         logEntry.innerHTML = `d${sides} 🎲: <strong>${result}</strong>`;
@@ -470,8 +475,37 @@ function rollDice(sides) {
             diceLogEl.lastChild.remove();
         }
     }
-    // === สิ้นสุดการเพิ่มส่วนนี้ ===
 }
+
+// **ฟังก์ชัน clearDiceLog() ต้องอยู่ตรงนี้ (นอกฟังก์ชัน rollDice)**
+async function clearDiceLog() { // ต้องเป็น async function
+    if (!window.db) {
+        console.warn("Firebase Firestore not initialized. Cannot clear dice log.");
+        alert("Cannot clear log: Database not connected.");
+        return;
+    }
+
+    const diceRollsColRef = window.collection(window.db, 'diceRolls');
+    const q = window.query(diceRollsColRef); // ดึงข้อมูลทั้งหมดใน collection
+
+    try {
+        const snapshot = await window.getDocs(q); // ใช้ getDocs เพื่อดึงข้อมูลครั้งเดียว
+        
+        // ลบแต่ละ Document
+        const deletePromises = [];
+        snapshot.forEach((doc) => {
+            deletePromises.push(window.deleteDoc(window.doc(window.db, 'diceRolls', doc.id))); // ใช้ deleteDoc และ doc
+        });
+        await Promise.all(deletePromises); // รอให้ทุกการลบเสร็จสิ้น
+        
+        console.log("Dice log cleared successfully!");
+        // UI จะอัปเดตอัตโนมัติผ่าน onSnapshot listener
+    } catch (error) {
+        console.error("Error clearing dice log: ", error);
+        alert("Failed to clear dice log. Check console for details.");
+    }
+}
+
 
 // =================================================================
 // SECTION: Save & Load (localStorage version)

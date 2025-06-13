@@ -7,14 +7,10 @@
     <link rel="stylesheet" href="style.css">
 
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-
-        // Your web app's Firebase configuration
-        // ให้แทนที่ด้วยค่าที่คุณได้มาจาก Firebase Console
+        // **เพิ่ม getDocs, deleteDoc, doc ตรงนี้**
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        
         const firebaseConfig = {
             apiKey: "AIzaSyBaEFhSpNhlorWLLvYOANpx0hDR9DHlMEs",
             authDomain: "vtt-backend.firebaseapp.com",
@@ -24,12 +20,9 @@
             appId: "1:95258551934:web:5ac65d16274dccc3899a2f"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ทำให้ db และฟังก์ชัน Firestore อื่นๆ สามารถเข้าถึงได้ทั่วโลก (Global)
-        // เพื่อให้ script.js และ dice_script.js สามารถเรียกใช้งานได้
         window.db = db;
         window.collection = collection;
         window.addDoc = addDoc;
@@ -38,8 +31,12 @@
         window.orderBy = orderBy;
         window.limit = limit;
         window.serverTimestamp = serverTimestamp;
+        // **ต้องเพิ่มบรรทัดนี้เพื่อใช้ clearDiceLog ที่ลบจาก Firebase**
+        window.getDocs = getDocs;
+        window.deleteDoc = deleteDoc;
+        window.doc = doc;
     </script>
-</head>
+    </head>
 <body>
     <aside id="controls">
         <h3>แผงควบคุม</h3>
@@ -149,7 +146,7 @@
     
     <aside id="dice-log-right">
         <h3>Dice Roller</h3>
-        <div class="control-group">
+        <div class="control-group dice-buttons">
             <button onclick="rollDice(4)">d4</button>
             <button onclick="rollDice(6)">d6</button>
             <button onclick="rollDice(8)">d8</button>
@@ -165,6 +162,8 @@
         <div id="dice-log-container">
             <strong>Log:</strong>
             <div id="dice-log"></div>
+        </div>
+        <div class="control-group"> <button onclick="clearDiceLog()" style="background-color: #c0392b;">Clear Log</button>
         </div>
         <hr>
         <div class="control-group">
@@ -190,7 +189,8 @@
                 <li><strong>Deleting Tokens:</strong> Right-click a token and select "Delete Token", or select a token (yellow border) and press the `Delete` or `Backspace` key.</li>
                 <li><strong>Deselecting:</strong> Click on any empty space on the board to deselect a token.</li>
                 <li><strong>Fog of War:</strong> Use the "Toggle Fog of War" button to turn the fog layer on/off. When on, click and drag to reveal parts of the map.</li>
-                <li><strong>Drawing Tools:</strong> Select a tool (Pen/Eraser), color, and line width. Then click and drag on the map to draw. Click the tool button again to deactivate drawing.</li>
+                <li><strong>Drawing Tools:
+</strong> Select a tool (Pen/Eraser), color, and line width. Then click and drag on the map to draw. Click the tool button again to deactivate drawing.</li>
                 <li><strong>Turn Tracker:</strong> Type a name and click "Add" to add to the list. Use "Next Turn" to advance and "Clear" to reset the list.</li>
                 <li><strong>Saving & Loading:</strong> Use the "Save Game" button to save your progress to the browser. The game will automatically load when you re-open the page. Use "Load Last Save" to manually restore it.</li>
                 <li><strong>File Size Warning:</strong> The automatic save system may fail if you upload very large images.</li>
