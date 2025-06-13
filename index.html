@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D VTT Final</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <aside id="controls">
+        <h3>แผงควบคุม</h3>
+        <div class="control-group">
+            <button onclick="saveGame()" style="background-color: #3498db;">💾 Save Game</button>
+        </div>
+        <div class="control-group">
+            <button onclick="loadGame()" style="background-color: #9b59b6;">📂 Load Last Save</button>
+        </div>
+        <div class="control-group">
+            <button onclick="openHelpModal()" style="background-color: #1abc9c;">❓ Help / How to Use</button>
+        </div>
+        <hr>
+
+        <h3>Map Settings</h3>
+        <div class="control-group">
+            <label for="map-url">URL รูปแผนที่</label>
+            <input type="text" id="map-url" placeholder="วาง URL ที่นี่...">
+            <button onclick="setMapFromUrl()">Set Map</button>
+            <input type="file" id="map-file" accept="image/*" onchange="setMapFromFile(event)">
+            <label for="map-file" class="file-label">...หรืออัปโหลด</label>
+        </div>
+        <hr>
+
+        <h3>Board Settings</h3>
+        <div class="control-group">
+            <button onclick="toggleFog()" id="toggle-fog-btn">Toggle Fog of War</button>
+        </div>
+        <hr>
+        
+        <h3>Turn Tracker</h3>
+        <div class="control-group">
+            <ul id="turn-list"></ul>
+        </div>
+        <div class="control-group">
+            <input type="text" id="turn-add-name" placeholder="Add character name...">
+            <button onclick="addToTracker()">Add</button>
+        </div>
+        <div class="control-group turn-buttons">
+            <button onclick="nextTurn()">Next Turn ➡️</button>
+            <button onclick="clearTracker()" style="background-color:#c0392b;">Clear</button>
+        </div>
+        <hr>
+
+        <h3>Drawing Tools</h3>
+        <div class="control-group drawing-tools">
+            <button id="tool-pen" onclick="selectTool('pen')">Pen</button>
+            <button id="tool-eraser" onclick="selectTool('eraser')">Eraser</button>
+        </div>
+        <div class="control-group">
+            <label for="draw-color">Color:</label>
+            <input type="color" id="draw-color" value="#ff0000">
+        </div>
+        <div class="control-group">
+            <label for="draw-width">Line Width:</label>
+            <input type="range" id="draw-width" min="1" max="20" value="3">
+        </div>
+        <div class="control-group">
+             <button onclick="clearCanvas()" style="background-color:#c0392b;">Clear Drawings</button>
+        </div>
+        <hr>
+
+        <h3>Dice Roller</h3>
+        <div class="control-group dice-buttons">
+            <button onclick="rollDice(4)">d4</button>
+            <button onclick="rollDice(6)">d6</button>
+            <button onclick="rollDice(8)">d8</button>
+            <button onclick="rollDice(10)">d10</button>
+            <button onclick="rollDice(12)">d12</button>
+            <button onclick="rollDice(20)">d20</button>
+            <button onclick="rollDice(100)">d100</button>
+        </div>
+        <div class="dice-result-area">
+            <strong>Last Roll:</strong>
+            <span id="dice-result">-</span>
+        </div>
+        <div id="dice-log-container">
+            <strong>Log:</strong>
+            <div id="dice-log"></div>
+        </div>
+        <hr>
+        
+        <h3>เพิ่มโทเคน</h3>
+        <div class="control-group">
+            <label for="token-name">ชื่อโทเคน</label>
+            <input type="text" id="token-name" placeholder="เช่น Elara, Goblin">
+        </div>
+        <div class="control-group">
+            <label for="token-hp">HP สูงสุด</label>
+            <input type="number" id="token-hp" placeholder="เช่น 25" value="10">
+        </div>
+        <div class="control-group">
+            <label for="token-url">URL รูปโทเคน</label>
+            <input type="text" id="token-url" placeholder="วาง URL หรืออัปโหลด">
+            <input type="file" id="token-file" accept="image/*">
+            <label for="token-file" class="file-label">เลือกไฟล์โทเคน...</label>
+        </div>
+        <div class="control-group">
+            <label for="token-size">ขนาด (Size)</label>
+            <select id="token-size">
+                <option value="1">Medium (1x1)</option>
+                <option value="2">Large (2x2)</option>
+                <option value="3">Huge (3x3)</option>
+                <option value="4">Gargantuan (4x4)</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label for="token-type">ประเภท</label>
+            <select id="token-type">
+                <option value="player">Player</option>
+                <option value="monster">Monster</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <button onclick="addToken()">เพิ่มโทเคนลงกระดาน</button>
+        </div>
+        
+    </aside>
+
+    <main>
+        <div id="game-board">
+            <div id="grid-overlay"></div>
+            <div id="fog-container"></div>
+            <canvas id="drawing-canvas"></canvas>
+        </div>
+    </main>
+    
+    <div id="context-menu" class="hidden">
+        <div class="context-menu-item" id="ctx-edit-hp">Edit HP</div>
+        <div class="context-menu-item" id="ctx-add-tracker">Add to Tracker</div>
+        <div class="context-menu-item" id="ctx-delete">Delete Token</div>
+    </div>
+    
+    <div id="help-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-button" onclick="closeHelpModal()">&times;</button>
+            <h2>How to Use This VTT</h2>
+            <ul>
+                <li><strong>Moving Tokens:</strong> Click and drag any token. It will snap to the grid on release.</li>
+                <li><strong>Token Menu:</strong> <strong>Right-click</strong> on a token to open a menu for quick actions.</li>
+                <li><strong>Editing HP:</strong> Right-click a token and select "Edit HP".</li>
+                <li><strong>Deleting Tokens:</strong> Right-click a token and select "Delete Token", or select a token (yellow border) and press the `Delete` or `Backspace` key.</li>
+                <li><strong>Deselecting:</strong> Click on any empty space on the board to deselect a token.</li>
+                <li><strong>Fog of War:</strong> Use the "Toggle Fog of War" button to turn the fog layer on/off. When on, click and drag to reveal parts of the map.</li>
+                <li><strong>Drawing Tools:</strong> Select a tool (Pen/Eraser), color, and line width. Then click and drag on the map to draw. Click the tool button again to deactivate drawing.</li>
+                <li><strong>Turn Tracker:</strong> Type a name and click "Add" to add to the list. Use "Next Turn" to advance and "Clear" to reset the list.</li>
+                <li><strong>Saving & Loading:</strong> Use the "Save Game" button to save your progress to the browser. The game will automatically load when you re-open the page. Use "Load Last Save" to manually restore it.</li>
+                <li><strong>File Size Warning:</strong> The automatic save system may fail if you upload very large images.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
