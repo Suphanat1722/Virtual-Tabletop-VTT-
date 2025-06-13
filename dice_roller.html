@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dice Roller</title>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        // ให้แทนที่ด้วยค่าที่คุณได้มาจาก Firebase Console
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaEFhSpNhlorWLLvYOANpx0hDR9DHlMEs",
+            authDomain: "vtt-backend.firebaseapp.com",
+            projectId: "vtt-backend",
+            storageBucket: "vtt-backend.firebasestorage.app",
+            messagingSenderId: "95258551934",
+            appId: "1:95258551934:web:5ac65d16274dccc3899a2f"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ทำให้ db และฟังก์ชัน Firestore อื่นๆ สามารถเข้าถึงได้ทั่วโลก (Global)
+        // เพื่อให้ script.js และ dice_script.js สามารถเรียกใช้งานได้
+        window.db = db;
+        window.collection = collection;
+        window.addDoc = addDoc;
+        window.onSnapshot = onSnapshot;
+        window.query = query;
+        window.orderBy = orderBy;
+        window.limit = limit;
+        window.serverTimestamp = serverTimestamp;
+    </script>
+    <link rel="stylesheet" href="style.css"> <style>
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+        }
+        .dice-container {
+            background-color: #34495e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .dice-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 คอลัมน์ */
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .dice-buttons button {
+            padding: 12px;
+            font-size: 1.1em;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .dice-buttons button:hover {
+            background-color: #f39c12;
+        }
+        .dice-result-area {
+            margin: 20px 0;
+            font-size: 1.4em;
+        }
+        #dice-result {
+            font-size: 2em;
+            font-weight: bold;
+            color: #f1c40f;
+            display: block; /* ทำให้ขึ้นบรรทัดใหม่ */
+            margin-top: 10px;
+        }
+        #dice-log-container {
+            margin-top: 15px;
+        }
+        #dice-log {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 4px;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
+            text-align: left;
+            display: flex;
+            flex-direction: column-reverse; /* ให้รายการใหม่ขึ้นด้านบน */
+        }
+        #dice-log div {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #7f8c8d;
+        }
+        #dice-log div:last-child {
+            border-bottom: none;
+        }
+        .player-name-input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #7f8c8d;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="dice-container">
+        <h2>Dice Roller</h2>
+        <input type="text" id="player-name" class="player-name-input" placeholder="ใส่ชื่อของคุณที่นี่" value="">
+
+        <div class="dice-buttons">
+            <button onclick="rollDice(4)">d4</button>
+            <button onclick="rollDice(6)">d6</button>
+            <button onclick="rollDice(8)">d8</button>
+            <button onclick="rollDice(10)">d10</button>
+            <button onclick="rollDice(12)">d12</button>
+            <button onclick="rollDice(20)">d20</button>
+            <button onclick="rollDice(100)">d100</button>
+        </div>
+
+        <div class="dice-result-area">
+            <strong>Last Roll:</strong>
+            <span id="dice-result">-</span>
+        </div>
+
+        <div id="dice-log-container">
+            <strong>Log:</strong>
+            <div id="dice-log"></div>
+        </div>
+    </div>
+
+    <script src="dice_script.js"></script>
+</body>
+</html>
