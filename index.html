@@ -101,26 +101,6 @@
              <button onclick="clearCanvas()" style="background-color:#c0392b;">Clear Drawings</button>
         </div>
         <hr>
-
-        <h3>Dice Roller</h3>
-        <div class="control-group dice-buttons">
-            <button onclick="rollDice(4)">d4</button>
-            <button onclick="rollDice(6)">d6</button>
-            <button onclick="rollDice(8)">d8</button>
-            <button onclick="rollDice(10)">d10</button>
-            <button onclick="rollDice(12)">d12</button>
-            <button onclick="rollDice(20)">d20</button>
-            <button onclick="rollDice(100)">d100</button>
-        </div>
-        <div class="dice-result-area">
-            <strong>Last Roll:</strong>
-            <span id="dice-result">-</span>
-        </div>
-        <div id="dice-log-container">
-            <strong>Log:</strong>
-            <div id="dice-log"></div>
-        </div>
-        <hr>
         
         <h3>เพิ่มโทเคน</h3>
         <div class="control-group">
@@ -167,6 +147,32 @@
         </div>
     </main>
     
+    <aside id="dice-log-right">
+        <h3>Dice Roller</h3>
+        <div class="control-group">
+            <button onclick="rollDice(4)">d4</button>
+            <button onclick="rollDice(6)">d6</button>
+            <button onclick="rollDice(8)">d8</button>
+            <button onclick="rollDice(10)">d10</button>
+            <button onclick="rollDice(12)">d12</button>
+            <button onclick="rollDice(20)">d20</button>
+            <button onclick="rollDice(100)">d100</button>
+        </div>
+        <div class="dice-result-area">
+            <strong>Last Roll:</strong>
+            <span id="dice-result">-</span>
+        </div>
+        <div id="dice-log-container">
+            <strong>Log:</strong>
+            <div id="dice-log"></div>
+        </div>
+        <hr>
+        <div class="control-group">
+            <a href="dice_roller.html" target="_blank" class="external-dice-link">
+                Open Player Dice Roller
+            </a>
+        </div>
+    </aside>
     <div id="context-menu" class="hidden">
         <div class="context-menu-item" id="ctx-edit-hp">Edit HP</div>
         <div class="context-menu-item" id="ctx-add-tracker">Add to Tracker</div>
